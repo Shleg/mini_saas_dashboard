@@ -27,14 +27,17 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy standalone server and static files
 # In standalone mode, .next/standalone contains server.js, node_modules, .next/static, and public
+# Copy standalone first - this creates the base structure
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
 # Copy dependencies needed for seed script (postgres, bcryptjs)
 # Standalone may not include all dependencies, so we ensure these are available
+# Merge into existing node_modules from standalone
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/postgres ./node_modules/postgres
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
 
 # Copy entrypoint and scripts needed for seed
+# These go into the root /app directory
 COPY --chown=nextjs:nodejs docker/entrypoint.sh /entrypoint.sh
 COPY --chown=nextjs:nodejs package.json ./
 COPY --chown=nextjs:nodejs package-lock.json ./

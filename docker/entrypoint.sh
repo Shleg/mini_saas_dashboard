@@ -17,22 +17,26 @@ npm run seed
 echo "Starting Next.js application..."
 
 # Start Next.js in standalone mode
-# In standalone mode, server.js should be in /app after copying .next/standalone
+# In standalone mode, .next/standalone contains server.js
+# We copy .next/standalone to /app, so server.js should be at /app/server.js
 cd /app
 
-# Debug: list files to see structure
-echo "Checking for server.js..."
+# Check if server.js exists in current directory (should be there after copying standalone)
 if [ -f server.js ]; then
   echo "Found server.js in /app"
   exec node server.js
-elif [ -f .next/standalone/server.js ]; then
-  echo "Found server.js in .next/standalone"
-  exec node .next/standalone/server.js
 else
-  echo "Error: server.js not found"
+  echo "Error: server.js not found in /app"
+  echo "This means .next/standalone was not copied correctly or Next.js standalone build failed"
   echo "Contents of /app:"
-  ls -la /app | head -20
-  echo "Looking for server.js..."
-  find /app -name "server.js" -type f 2>/dev/null | head -10
+  ls -la /app
+  echo ""
+  echo "Checking if .next/standalone exists:"
+  if [ -d .next/standalone ]; then
+    echo ".next/standalone directory exists"
+    ls -la .next/standalone | head -10
+  else
+    echo ".next/standalone directory not found"
+  fi
   exit 1
 fi
