@@ -384,11 +384,11 @@ export default function Dashboard() {
       {/* Modal */}
       {modalOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
           onClick={closeModal}
         >
           <div 
-            className="relative p-5 border w-96 shadow-lg rounded-md bg-white"
+            className="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white z-50"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mt-3">
