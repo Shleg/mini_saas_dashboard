@@ -59,7 +59,22 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
 
 // Projects
 export async function listProjects(params: { status?: string; q?: string }): Promise<ProjectRow[]> {
-  let query = sql`
+  const conditions: string[] = [];
+  const values: any[] = [];
+  let paramIndex = 1;
+
+  if (params.status) {
+    conditions.push(`p.status = $${paramIndex++}`);
+    values.push(params.status);
+  }
+
+  if (params.q) {
+    conditions.push(`tm.name ILIKE $${paramIndex++}`);
+    values.push(`%${params.q}%`);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const query = `
     SELECT 
       p.id,
       p.status,
@@ -71,27 +86,12 @@ export async function listProjects(params: { status?: string; q?: string }): Pro
       p.updated_at
     FROM projects p
     INNER JOIN team_members tm ON p.team_member_id = tm.id
-    WHERE 1=1
+    ${whereClause}
+    ORDER BY p.created_at DESC
   `;
 
-  if (params.status) {
-    query = sql`
-      ${query}
-      AND p.status = ${params.status}
-    `;
-  }
-
-  if (params.q) {
-    query = sql`
-      ${query}
-      AND tm.name ILIKE ${'%' + params.q + '%'}
-    `;
-  }
-
-  query = sql`${query} ORDER BY p.created_at DESC`;
-
-  const result = await query;
-  return result as ProjectRow[];
+  const result = await sql.unsafe<ProjectRow[]>(query, values);
+  return result;
 }
 
 export async function getProjectById(id: number): Promise<ProjectRow | null> {
@@ -110,11 +110,19 @@ export async function getProjectById(id: number): Promise<ProjectRow | null> {
     WHERE p.id = ${id}
     LIMIT 1
   `;
-  return result.length > 0 ? result[0] : null;
+  return (result.length > 0 ? result[0] : null) as ProjectRow | null;
 }
 
 export async function createProject(input: CreateProjectInput): Promise<ProjectRow> {
-  const result = await sql<ProjectRow[]>`
+  const result = await sql<Array<{
+    id: number;
+    status: ProjectStatus;
+    deadline: string;
+    budget: number;
+    team_member_id: number;
+    created_at: string;
+    updated_at: string;
+  }>>`
     INSERT INTO projects (status, deadline, budget, team_member_id, created_at, updated_at)
     VALUES (${input.status}, ${input.deadline}, ${input.budget}, ${input.teamMemberId}, now(), now())
     RETURNING 
@@ -130,7 +138,7 @@ export async function createProject(input: CreateProjectInput): Promise<ProjectR
   const project = result[0];
   
   // Get team member name
-  const teamMember = await sql<{ name: string }[]>`
+  const teamMember = await sql<Array<{ name: string }>>`
     SELECT name FROM team_members WHERE id = ${input.teamMemberId}
   `;
 
@@ -183,17 +191,25 @@ export async function updateProject(id: number, input: UpdateProjectInput): Prom
       updated_at
   `;
 
-  const result = await sql.unsafe(query, values);
+  const result = await sql.unsafe<Array<{
+    id: number;
+    status: ProjectStatus;
+    deadline: string;
+    budget: number;
+    team_member_id: number;
+    created_at: string;
+    updated_at: string;
+  }>>(query, values);
   
   if (result.length === 0) {
     return null;
   }
 
-  const project = result[0] as any;
+  const project = result[0];
   const teamMemberId = input.teamMemberId !== undefined ? input.teamMemberId : project.team_member_id;
   
   // Get team member name
-  const teamMember = await sql<{ name: string }[]>`
+  const teamMember = await sql<Array<{ name: string }>>`
     SELECT name FROM team_members WHERE id = ${teamMemberId}
   `;
 
