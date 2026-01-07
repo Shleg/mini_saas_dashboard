@@ -111,13 +111,24 @@ export default function Dashboard() {
   };
 
   const openModal = (project?: Project) => {
-    console.log('openModal called', { project, modalOpen });
     if (project) {
       setEditingProjectId(project.id);
-      // Convert deadline from YYYY-MM-DD to format for date input
-      // Parse as local date to avoid timezone issues
-      const deadlineDate = project.deadline ? new Date(project.deadline + 'T12:00:00') : new Date();
-      const formattedDeadline = deadlineDate.toISOString().split('T')[0];
+      // Convert deadline to format for date input (YYYY-MM-DD)
+      // Handle different date formats from database
+      let formattedDeadline = '';
+      if (project.deadline) {
+        try {
+          // If deadline already contains time (ISO format), extract just the date part
+          const dateStr = project.deadline.split('T')[0];
+          // Parse as local date to avoid timezone issues
+          const [year, month, day] = dateStr.split('-').map(Number);
+          const deadlineDate = new Date(year, month - 1, day);
+          formattedDeadline = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        } catch (err) {
+          console.error('Error parsing deadline:', err);
+          formattedDeadline = project.deadline.split('T')[0]; // Fallback to just date part
+        }
+      }
       
       setFormData({
         status: project.status,
@@ -135,7 +146,6 @@ export default function Dashboard() {
       });
     }
     setModalOpen(true);
-    console.log('Modal should be open now');
   };
 
   const closeModal = () => {
@@ -209,15 +219,21 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    // Parse date as local to avoid timezone shift
-    // If dateString is YYYY-MM-DD, add time to parse as local
-    const dateStr = dateString.includes('T') ? dateString : dateString + 'T12:00:00';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    try {
+      // Extract just the date part (YYYY-MM-DD) if it contains time
+      const dateOnly = dateString.split('T')[0];
+      const [year, month, day] = dateOnly.split('-').map(Number);
+      // Create date in local timezone to avoid shift
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch (err) {
+      console.error('Error formatting date:', err, dateString);
+      return dateString; // Fallback to original string
+    }
   };
 
   const formatCurrency = (amount: number) => {
@@ -353,7 +369,6 @@ export default function Dashboard() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Edit button clicked', project);
                             openModal(project);
                           }}
                           className="text-indigo-600 hover:text-indigo-900 mr-4 cursor-pointer"
