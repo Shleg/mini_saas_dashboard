@@ -22,7 +22,15 @@ export async function signJwt(payload: Omit<JWTPayload, 'exp'>): Promise<string>
 export async function verifyJwt(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as JWTPayload;
+    // Type assertion with validation
+    if (payload && typeof payload === 'object' && 'sub' in payload && 'email' in payload) {
+      return {
+        sub: String(payload.sub),
+        email: String(payload.email),
+        exp: payload.exp ? Number(payload.exp) : undefined,
+      } as JWTPayload;
+    }
+    return null;
   } catch (error) {
     return null;
   }
