@@ -31,9 +31,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
 # Copy additional node_modules for seed script (tsx and its dependencies)
 # Standalone already has production node_modules, but we need tsx for seeding
-# Copy tsx package and ensure .bin directory exists
+# Copy tsx and its required dependencies (esbuild, etc.)
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
-# Copy .bin directory from deps (contains tsx executable)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/esbuild ./node_modules/esbuild
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.bin ./node_modules/.bin
 
 # Copy entrypoint and scripts needed for seed
