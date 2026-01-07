@@ -113,9 +113,14 @@ export default function Dashboard() {
   const openModal = (project?: Project) => {
     if (project) {
       setEditingProjectId(project.id);
+      // Convert deadline from YYYY-MM-DD to format for date input
+      // Parse as local date to avoid timezone issues
+      const deadlineDate = project.deadline ? new Date(project.deadline + 'T12:00:00') : new Date();
+      const formattedDeadline = deadlineDate.toISOString().split('T')[0];
+      
       setFormData({
         status: project.status,
-        deadline: project.deadline,
+        deadline: formattedDeadline,
         budget: project.budget,
         teamMemberId: project.team_member_id,
       });
@@ -202,7 +207,10 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Parse date as local to avoid timezone shift
+    // If dateString is YYYY-MM-DD, add time to parse as local
+    const dateStr = dateString.includes('T') ? dateString : dateString + 'T12:00:00';
+    const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -362,8 +370,14 @@ export default function Dashboard() {
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          onClick={closeModal}
+        >
+          <div 
+            className="relative p-5 border w-96 shadow-lg rounded-md bg-white"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingProjectId ? 'Edit Project' : 'Add Project'}
