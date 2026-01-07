@@ -11,8 +11,16 @@ done
 
 echo "PostgreSQL is up - executing seed script..."
 
-# Run seed script
-npm run seed
+# Run seed script using npx to find tsx in node_modules
+# Use full path to node_modules/.bin/tsx as fallback
+if [ -f node_modules/.bin/tsx ]; then
+  node_modules/.bin/tsx scripts/seed.ts
+elif command -v npx >/dev/null 2>&1; then
+  npx tsx scripts/seed.ts
+else
+  echo "Error: tsx not found. Trying npm run seed..."
+  npm run seed
+fi
 
 echo "Starting Next.js application..."
 
