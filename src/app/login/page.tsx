@@ -16,25 +16,30 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('Attempting login with:', { email });
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Important: include cookies
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Login response status:', response.status);
+      const responseData = await response.json().catch(() => null);
+      console.log('Login response data:', responseData);
+
       if (response.ok) {
+        console.log('Login successful, redirecting...');
         // Wait a bit for cookie to be set
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         router.push('/');
         router.refresh();
       } else {
-        const data = await response.json().catch(() => ({ error: 'Login failed' }));
-        setError(data.error || 'Login failed');
+        setError(responseData?.error || `Login failed (${response.status})`);
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('An error occurred. Please try again.');
+      setError(`An error occurred: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
