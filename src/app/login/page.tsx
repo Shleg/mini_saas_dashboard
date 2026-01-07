@@ -19,17 +19,21 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Important: include cookies
         body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
+        // Wait a bit for cookie to be set
+        await new Promise(resolve => setTimeout(resolve, 100));
         router.push('/');
         router.refresh();
       } else {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({ error: 'Login failed' }));
         setError(data.error || 'Login failed');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);

@@ -77,7 +77,10 @@ export default function Dashboard() {
         params.append('q', searchQuery);
       }
 
-      const response = await fetch(`/api/projects?${params.toString()}`);
+      const response = await fetch(`/api/projects?${params.toString()}`, {
+        credentials: 'include', // Important: include cookies
+      });
+      
       if (response.status === 401) {
         router.push('/login');
         return;
@@ -87,9 +90,14 @@ export default function Dashboard() {
         setProjects(data);
         setError('');
       } else {
-        setError('Failed to fetch projects');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch projects' }));
+        setError(errorData.error || 'Failed to fetch projects');
+        if (response.status === 401) {
+          router.push('/login');
+        }
       }
     } catch (err) {
+      console.error('Error fetching projects:', err);
       setError('An error occurred');
     } finally {
       setLoading(false);
