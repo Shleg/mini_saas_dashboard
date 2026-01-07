@@ -111,6 +111,7 @@ export default function Dashboard() {
   };
 
   const openModal = (project?: Project) => {
+    console.log('openModal called', { project, modalOpen });
     if (project) {
       setEditingProjectId(project.id);
       // Convert deadline from YYYY-MM-DD to format for date input
@@ -134,6 +135,7 @@ export default function Dashboard() {
       });
     }
     setModalOpen(true);
+    console.log('Modal should be open now');
   };
 
   const closeModal = () => {
@@ -347,14 +349,25 @@ export default function Dashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => openModal(project)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Edit button clicked', project);
+                            openModal(project);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4 cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(project.id)}
-                          className="text-red-600 hover:text-red-900"
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDelete(project.id);
+                          }}
+                          className="text-red-600 hover:text-red-900 cursor-pointer"
                         >
                           Delete
                         </button>
