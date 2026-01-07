@@ -30,6 +30,12 @@ RUN adduser --system --uid 1001 nextjs
 # Copy standalone first - this creates the base structure
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
+# Copy static files - standalone mode requires .next/static to be copied separately
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy public files if they exist
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
 # Copy dependencies needed for seed script (postgres, bcryptjs)
 # Standalone may not include all dependencies, so we ensure these are available
 # Merge into existing node_modules from standalone
