@@ -25,10 +25,13 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/public ./public
+# Copy standalone server and static files
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Copy node_modules for seed script (needed for tsx and other deps)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Copy entrypoint and scripts needed for seed
 COPY --chown=nextjs:nodejs docker/entrypoint.sh /entrypoint.sh

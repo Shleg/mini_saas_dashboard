@@ -16,5 +16,6 @@ npm run seed
 
 echo "Starting Next.js application..."
 
-# Start Next.js
-exec npm run start
+# Start Next.js in standalone mode
+cd /app
+exec node server.js
