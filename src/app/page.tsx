@@ -399,7 +399,7 @@ export default function Dashboard() {
       {/* Modal */}
       {modalOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-20 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/20 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
           onClick={closeModal}
         >
           <div 
