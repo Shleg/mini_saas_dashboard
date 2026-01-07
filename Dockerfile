@@ -29,19 +29,13 @@ RUN adduser --system --uid 1001 nextjs
 # In standalone mode, .next/standalone contains server.js, node_modules, .next/static, and public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 
-# Copy additional node_modules for seed script (tsx and its dependencies)
-# Standalone already has production node_modules, but we need tsx for seeding
-# Copy tsx and its required dependencies (esbuild, etc.)
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.bin ./node_modules/.bin
+# No need to copy tsx anymore - seed script is now JavaScript
 
 # Copy entrypoint and scripts needed for seed
 COPY --chown=nextjs:nodejs docker/entrypoint.sh /entrypoint.sh
 COPY --chown=nextjs:nodejs package.json ./
 COPY --chown=nextjs:nodejs package-lock.json ./
 COPY --chown=nextjs:nodejs scripts ./scripts
-COPY --chown=nextjs:nodejs tsconfig.json ./
 
 RUN chmod +x /entrypoint.sh
 
