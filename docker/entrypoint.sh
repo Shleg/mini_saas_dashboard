@@ -25,18 +25,16 @@ cd /app
 if [ -f server.js ]; then
   echo "Found server.js in /app"
   exec node server.js
+elif [ -f .next/standalone/server.js ]; then
+  echo "Found server.js in .next/standalone, using it"
+  cd .next/standalone
+  exec node server.js
 else
-  echo "Error: server.js not found in /app"
-  echo "This means .next/standalone was not copied correctly or Next.js standalone build failed"
+  echo "Error: server.js not found"
   echo "Contents of /app:"
-  ls -la /app
+  ls -la /app | head -15
   echo ""
-  echo "Checking if .next/standalone exists:"
-  if [ -d .next/standalone ]; then
-    echo ".next/standalone directory exists"
-    ls -la .next/standalone | head -10
-  else
-    echo ".next/standalone directory not found"
-  fi
+  echo "Searching for server.js:"
+  find /app -name "server.js" -type f 2>/dev/null | grep -v node_modules | head -5
   exit 1
 fi
