@@ -105,35 +105,6 @@ Each project has the following fields:
 - **team_member_id**: Foreign key to team_members table
 - **budget**: Integer (non-negative)
 
-## Development
-
-### Running Locally (without Docker)
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Start PostgreSQL locally or use Docker for DB only:
-   ```bash
-   docker compose up db
-   ```
-
-3. Set up environment variables in `.env`:
-   ```
-   DATABASE_URL=postgresql://app:app@localhost:5432/app
-   JWT_SECRET=your-secret-key-here
-   ```
-
-4. Run the seed script:
-   ```bash
-   npm run seed
-   ```
-
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
 
 ## Project Structure
 
