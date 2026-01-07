@@ -17,5 +17,6 @@ npm run seed
 echo "Starting Next.js application..."
 
 # Start Next.js in standalone mode
+# In standalone mode, server.js should be in /app after copying .next/standalone
 cd /app
 exec node server.js
